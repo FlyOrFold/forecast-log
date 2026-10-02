@@ -21,12 +21,6 @@
 # Rows in sites.csv NOT forecast:
 #   richmond-dale: missing dir_ranges, speed_min, speed_max, gust_max
 #   wes-mar: missing dir_ranges, speed_min, speed_max, gust_max
-#   high-point: missing lat, lon
-#   zirks: missing lat, lon, dir_ranges, gust_max
-#   spruce-knob: missing lat, lon, dir_ranges, speed_min, speed_max, gust_max
-#   north-mountain: missing lat, lon, dir_ranges, speed_min, speed_max, gust_max
-#   avonmore: missing lat, lon, dir_ranges, speed_min, speed_max, gust_max
-#   templeton: missing lat, lon, dir_ranges, speed_min, speed_max, gust_max
 #   hyner-view: missing speed_min, speed_max, gust_max
 #   the-pulpit: missing dir_ranges, speed_min, speed_max, gust_max
 #   bills-hill: missing dir_ranges, speed_min, speed_max, gust_max
