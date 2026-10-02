@@ -1,7 +1,9 @@
-# FlyOrFold site definitions and flyable criteria.
+# GENERATED from sites.csv by `python -m forecast_log.sites`. Do not edit by
+# hand: edit sites.csv instead. Only `model` may be edited here (bump
+# criteria_version yourself if you change it).
 #
-# Bump `criteria_version` whenever ANY site's criteria change (or the ensemble
-# model changes), so probabilities logged under different rules stay separable.
+# criteria_version is bumped automatically when an existing site's location,
+# timezone or criteria change, so past probabilities stay comparable.
 #
 # Units: wind speeds and gusts in mph, precipitation in mm per hour,
 # wind direction in degrees (direction the wind blows FROM, 0 = N, 90 = E).
@@ -11,49 +13,45 @@
 #   wind_speed_min <= speed <= wind_speed_max
 #   gust <= gust_max
 #   direction inside any range in wind_dir_ranges (ranges may wrap through
-#     north, e.g. [315, 45])
+#     north, e.g. [340, 20])
 #   precipitation <= precip_max
 # The flying window covers hours starting at flying_hours[0] up to, but not
 # including, flying_hours[1]. [10, 18] means 10:00 through 17:59.
 #
 # A site with `placeholder: true` blocks the job from writing data
-# (--dry-run still works). Use it for sites whose criteria aren't settled.
+# (--dry-run still works).
 
 criteria_version: 1
 
-# Open-Meteo ensemble model. gfs_seamless = GFS ensemble (31 members, ~16 days).
-# Changing this changes what p_flyable means, so bump criteria_version too.
-model: gfs_seamless
+model: "gfs_seamless"
 
 sites:
-  - id: lake-erie-cleveland
-    name: Lake Erie ridge, Cleveland
+  - id: "lake-erie-cleveland"
+    # Window crosses north. speed_min and speed_max (hard max; good max is 12) are working assumptions. Gust limit is the USHPA P3 recommendation.
+    name: "Lake Erie ridge, Cleveland"
     lat: 41.4873
     lon: -81.7477
-    timezone: America/New_York
+    timezone: "America/New_York"
     criteria:
-      # speed_min and the 15 mph max are working assumptions; a 12 mph
-      # "good" max exists but flyable uses the hard max.
       wind_speed_min: 5
       wind_speed_max: 15
-      gust_max: 18  # USHPA P3 recommendation
-      wind_dir_ranges: [[340, 20]]  # crosses north
+      gust_max: 18
+      wind_dir_ranges: [[340, 20]]
       precip_max: 0.1
       flying_hours: [10, 18]
       min_consecutive_hours: 2
 
-  - id: tennessee-cliff
-    name: Tennessee cliff launch
-    lat: 35.3490
+  - id: "tennessee-cliff"
+    # Central time. Ideal direction 260-280; confirm direction and speed limits with the club. Stability check wanted but not scored yet.
+    name: "Tennessee cliff launch"
+    lat: 35.349
     lon: -85.3321
-    timezone: America/Chicago  # Central time, unlike the Ohio sites
+    timezone: "America/Chicago"
     criteria:
-      # Direction and speed limits still to be confirmed with the club.
-      # A stability check is wanted here but is not scored yet.
       wind_speed_min: 5
       wind_speed_max: 15
       gust_max: 18
-      wind_dir_ranges: [[255, 285]]  # ideal 260-280
+      wind_dir_ranges: [[255, 285]]
       precip_max: 0.1
       flying_hours: [10, 18]
       min_consecutive_hours: 2

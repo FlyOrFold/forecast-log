@@ -63,7 +63,8 @@ Planned: **Open-Meteo**'s ensemble forecast API (no API key, as far as I know). 
 .
 ├── CLAUDE.md
 ├── README.md
-├── sites.yaml                 # site ids, lat/lon, timezone, criteria, criteria_version
+├── sites.csv                  # hand-edited site list (spreadsheet); source for sites.yaml
+├── sites.yaml                 # GENERATED from sites.csv: ids, lat/lon, timezone, criteria, criteria_version
 ├── src/                       # fetch + scoring code
 ├── tests/                     # unit tests for scoring and dedupe logic
 ├── data/

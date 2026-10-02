@@ -26,7 +26,7 @@ class Config:
     sites: list
 
 
-def _criteria(raw: dict, site_id: str) -> Criteria:
+def parse_criteria(raw: dict, site_id: str) -> Criteria:
     try:
         c = Criteria(
             wind_speed_min=float(raw["wind_speed_min"]),
@@ -53,7 +53,10 @@ def _criteria(raw: dict, site_id: str) -> Criteria:
 
 def load(path) -> Config:
     with open(path, encoding="utf-8") as f:
-        raw = yaml.safe_load(f)
+        return parse(yaml.safe_load(f))
+
+
+def parse(raw: dict) -> Config:
     version = raw.get("criteria_version")
     if not isinstance(version, int) or version < 1:
         raise ValueError("criteria_version must be a positive integer")
@@ -75,7 +78,7 @@ def load(path) -> Config:
                 lat=float(s["lat"]),
                 lon=float(s["lon"]),
                 timezone=s["timezone"],
-                criteria=_criteria(s["criteria"], sid),
+                criteria=parse_criteria(s["criteria"], sid),
                 placeholder=bool(s.get("placeholder", False)),
             )
         )

@@ -1,0 +1,3 @@
+id,name,lat,lon,timezone,dir_ranges,speed_min,speed_max,gust_max,rain_mm_max,fly_start,fly_end,min_hours,placeholder,notes
+lake-erie-cleveland,"Lake Erie ridge, Cleveland",41.4873,-81.7477,America/New_York,340-20,5,15,18,0.1,10,18,2,,"Window crosses north. speed_min and speed_max (hard max; good max is 12) are working assumptions. Gust limit is the USHPA P3 recommendation."
+tennessee-cliff,Tennessee cliff launch,35.349,-85.3321,America/Chicago,255-285,5,15,18,0.1,10,18,2,,"Central time. Ideal direction 260-280; confirm direction and speed limits with the club. Stability check wanted but not scored yet."

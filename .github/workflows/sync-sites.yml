@@ -1,27 +1,24 @@
-name: fetch-forecasts
+name: sync-sites
 
+# Regenerates sites.yaml (and fills blank timezones in sites.csv) whenever
+# sites.csv changes on main, then commits the result.
 on:
-  schedule:
-    # 10:30 UTC (06:30 EDT / 05:30 EST): after the 00Z ensemble runs have published.
-    - cron: "30 10 * * *"
+  push:
+    branches: [main]
+    paths: [sites.csv]
   workflow_dispatch:
-    inputs:
-      dry_run:
-        description: "Fetch and print only; do not commit"
-        type: boolean
-        default: false
 
 permissions:
   contents: write
 
 concurrency:
-  group: repo-write # shared with sync-sites so their pushes never race
+  group: repo-write # shared with fetch-forecasts so their pushes never race
   cancel-in-progress: false
 
 jobs:
-  fetch:
+  sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     env:
       PYTHONPATH: src
     steps:
@@ -34,22 +31,21 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: Generate sites.yaml
+        run: python -m forecast_log.sites
+
       - name: Unit tests
         run: python -m unittest discover -s tests
 
-      - name: Fetch forecasts
-        run: python -m forecast_log ${{ inputs.dry_run && '--dry-run' || '' }}
-
-      - name: Commit data if changed
-        if: ${{ !inputs.dry_run }}
+      - name: Commit if changed
         run: |
-          git add data/
+          git add sites.yaml sites.csv
           if git diff --cached --quiet; then
-            echo "No data changes."
+            echo "sites.yaml already up to date."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "data: forecasts for $(date -u +%F)"
+          git commit -m "sites: regenerate sites.yaml from sites.csv"
           git pull --rebase
           git push

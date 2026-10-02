@@ -45,9 +45,38 @@ Weather data comes from [Open-Meteo.com](https://open-meteo.com/) under [CC BY 4
 
 ## Configuring sites
 
-Edit `sites.yaml`. Its header comments document the units and every criterion. **Bump `criteria_version` whenever any criterion or the `model` changes.**
+**Edit `sites.csv`, not `sites.yaml`.** The CSV is the spreadsheet-friendly source. `sites.yaml` is generated from it, and the fetch job reads the YAML.
 
-To add a site whose criteria aren't settled yet, set `placeholder: true` on it. While any site has that flag, the job refuses to write data (dry runs still work), so the scheduled workflow **fails on purpose** until the flag is removed.
+1. Open `sites.csv` in Excel, Numbers or Google Sheets, then save or export it as CSV.
+2. Commit and push it, either locally or with *Add file → Upload files* on GitHub.
+3. The `sync-sites` workflow runs automatically. It regenerates `sites.yaml` and commits it as `github-actions[bot]`. If you pushed from your machine, run `git pull` afterwards.
+
+You can also run the generator locally to check your edits before pushing:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m forecast_log.sites
+```
+
+Columns (units: mph, mm per hour, degrees the wind blows **from**, site-local hours):
+
+| column | example | meaning |
+|---|---|---|
+| `id` | `lake-erie-cleveland` | stable id that appears in the data; never rename it once data is logged |
+| `name` | `Lake Erie ridge, Cleveland` | display name |
+| `lat`, `lon` | `41.4873`, `-81.7477` | launch coordinates |
+| `timezone` | `America/New_York` | **leave blank** and it is looked up from the coordinates and written back into the CSV |
+| `dir_ranges` | `340-20` or `255-285; 300-320` | allowed wind directions; a range may wrap through north |
+| `speed_min`, `speed_max` | `5`, `15` | wind speed range in mph, inclusive |
+| `gust_max` | `18` | max gust in mph |
+| `rain_mm_max` | `0.1` | max precipitation per hour in mm |
+| `fly_start`, `fly_end` | `10`, `18` | flying window; `10`–`18` means 10:00 through 17:59 |
+| `min_hours` | `2` | consecutive qualifying hours needed for the day to count as flyable |
+| `placeholder` | `yes` or blank | `yes` blocks the job from writing data until the site is finalized |
+| `notes` | | free text; copied into `sites.yaml` as a comment |
+
+`criteria_version` is **bumped automatically** when an existing site's coordinates, timezone or criteria change. Adding a site, removing one, or editing names and notes does not bump it. `model` is the only setting edited directly in `sites.yaml`. If you change it, bump `criteria_version` by hand.
+
+If any site has `placeholder` set, the job refuses to write data (dry runs still work), so the scheduled workflow **fails on purpose** until the flag is cleared. A test also fails if `sites.yaml` is out of date with `sites.csv`.
 
 Each site's `timezone` decides what "day" means for its target dates. Get it right for the launch itself, not the nearest city. For example, the Tennessee launch is on Central time even though Chattanooga is on Eastern.
 
