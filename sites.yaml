@@ -55,3 +55,18 @@ sites:
       precip_max: 0.1
       flying_hours: [10, 18]
       min_consecutive_hours: 2
+
+  - id: "canaan-valley"
+    # WV. Chairlift launch ~300 ft S of top of Ski Lift A (coords: Paragliding Earth #21300). Direction window is the 45-degree cross rule; speed 0-15 from club page (min not confirmed). Park allows gusts to 20; using the stricter P3 limit of 18. Not confirmed with the club.
+    name: "Canaan Valley Resort State Park"
+    lat: 38.9989
+    lon: -79.4352
+    timezone: "America/New_York"
+    criteria:
+      wind_speed_min: 0
+      wind_speed_max: 15
+      gust_max: 18
+      wind_dir_ranges: [[180, 270]]
+      precip_max: 0.1
+      flying_hours: [10, 18]
+      min_consecutive_hours: 2
