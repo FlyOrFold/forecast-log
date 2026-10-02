@@ -44,15 +44,6 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     cfg = config.load(args.sites)
-    placeholders = [s.id for s in cfg.sites if s.placeholder]
-    if placeholders and not args.dry_run:
-        print(
-            f"error: sites still marked placeholder in {args.sites}: {', '.join(placeholders)}. "
-            "Refusing to write data. Use --dry-run, or fill in real sites first.",
-            file=sys.stderr,
-        )
-        return 2
-
     issued = datetime.now(timezone.utc).date()
     try:
         rows = build_rows(cfg, issued)

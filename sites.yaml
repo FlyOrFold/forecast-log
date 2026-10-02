@@ -17,9 +17,10 @@
 #   precipitation <= precip_max
 # The flying window covers hours starting at flying_hours[0] up to, but not
 # including, flying_hours[1]. [10, 18] means 10:00 through 17:59.
-#
-# A site with `placeholder: true` blocks the job from writing data
-# (--dry-run still works).
+
+# Rows in sites.csv NOT forecast:
+#   richmond-dale: missing dir_ranges, speed_min, speed_max, gust_max
+#   wes-mar: missing dir_ranges, speed_min, speed_max, gust_max
 
 criteria_version: 1
 

@@ -40,7 +40,7 @@ class ParseTest(unittest.TestCase):
 class BuildRowsTest(unittest.TestCase):
     def test_fails_whole_run_when_a_day_has_no_data(self):
         crit = Criteria(5, 15, 20, ((225, 315),), 0.1, (10, 12), 1)
-        site = Site("s", "S", 40, -83, "America/New_York", crit, False)
+        site = Site("s", "S", 40, -83, "America/New_York", crit)
         cfg = Config(1, "gfs_seamless", [site])
         fetch = lambda *_: openmeteo.parse_members(RESPONSE)  # noqa: E731 - only one day of data
         with self.assertRaises(RuntimeError):

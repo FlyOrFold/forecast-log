@@ -45,8 +45,33 @@ class GenerateTest(unittest.TestCase):
         s = out["sites"][0]
         self.assertEqual(s["name"], "Ridge, OH")
         self.assertEqual(s["criteria"]["wind_dir_ranges"], [[340, 20]])
-        self.assertNotIn("placeholder", s)
         self.assertIsNone(rows)
+
+    def test_incomplete_and_skipped_rows_not_forecast(self):
+        incomplete = 'nodir,No Dir,40,-83,America/New_York,,5,15,18,0.1,10,18,2,,'
+        skipped = ROW.replace("ridge,", "held,", 1).replace(',,"a note"', ',yes,"a note"')
+        out, _ = self.gen(f"{HEADER}\n{ROW}\n{incomplete}\n{skipped}\n")
+        self.assertEqual([s["id"] for s in out["sites"]], ["ridge"])
+
+    def test_skipped_rows_listed_in_yaml_comment(self):
+        with tempfile.TemporaryDirectory() as d:
+            c = write(d, "sites.csv", f"{HEADER}\n{ROW}\nnodir,N,40,-83,,,,,,,,,,,\n")
+            text, _ = sites.generate(c, Path(d) / "s.yaml", log=lambda m: None)
+        self.assertIn("#   nodir: missing dir_ranges, speed_min", text)
+
+    def test_incomplete_row_needs_no_timezone_lookup(self):
+        def no_lookup(*_):
+            raise AssertionError("looked up a skipped row")
+
+        self.gen(f"{HEADER}\n{ROW}\nnodir,N,40,-83,,,,,,,,,,,\n", lookup=no_lookup)
+
+    def test_all_rows_skipped_is_an_error(self):
+        with self.assertRaises(ValueError):
+            self.gen(f"{HEADER}\nnodir,N,40,-83,,,,,,,,,,,\n")
+
+    def test_row_without_id_is_an_error(self):
+        with self.assertRaises(ValueError):
+            self.gen(f"{HEADER}\n{ROW}\n{ROW.replace('ridge,', ',', 1)}\n")
 
     def test_excel_bom_and_blank_rows(self):
         out, _ = self.gen(f"﻿{HEADER}\r\n{ROW}\r\n,,,,,,,,,,,,,,\r\n")

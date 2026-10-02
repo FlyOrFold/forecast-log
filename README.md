@@ -71,12 +71,14 @@ Columns (units: mph, mm per hour, degrees the wind blows **from**, site-local ho
 | `rain_mm_max` | `0.1` | max precipitation per hour in mm |
 | `fly_start`, `fly_end` | `10`, `18` | flying window; `10`–`18` means 10:00 through 17:59 |
 | `min_hours` | `2` | consecutive qualifying hours needed for the day to count as flyable |
-| `placeholder` | `yes` or blank | `yes` blocks the job from writing data until the site is finalized |
+| `skip` | `yes` or blank | `yes` keeps the row in the CSV but stops forecasting it |
 | `notes` | | free text; copied into `sites.yaml` as a comment |
 
 `criteria_version` is **bumped automatically** when an existing site's coordinates, timezone or criteria change. Adding a site, removing one, or editing names and notes does not bump it. `model` is the only setting edited directly in `sites.yaml`. If you change it, bump `criteria_version` by hand.
 
-If any site has `placeholder` set, the job refuses to write data (dry runs still work), so the scheduled workflow **fails on purpose** until the flag is cleared. A test also fails if `sites.yaml` is out of date with `sites.csv`.
+**Incomplete rows are fine.** A row is forecast only when every required column has a value: `lat`, `lon`, `dir_ranges`, `speed_min`, `speed_max`, `gust_max`, `rain_mm_max`, `fly_start`, `fly_end` and `min_hours`. Rows missing any of them, or with `skip` set to `yes`, stay in the CSV but are left out of `sites.yaml`. The top of `sites.yaml` lists them with the reason. A value that is filled in but invalid is still an error, so a typo can't silently drop a site.
+
+A skipped site stops getting new rows in the data, but its history is kept. A test fails if `sites.yaml` is out of date with `sites.csv`.
 
 Each site's `timezone` decides what "day" means for its target dates. Get it right for the launch itself, not the nearest city. For example, the Tennessee launch is on Central time even though Chattanooga is on Eastern.
 
@@ -118,7 +120,7 @@ Don't commit data from local runs. Data should come from the workflow, or from a
 
 ### Scheduled-workflow auto-disable
 
-GitHub automatically disables scheduled workflows in a **public** repository after **60 days with no repository activity**. The daily data commits normally count as activity. If the job keeps failing (for example, while the placeholder sites are still in place), there will be no commits, and the schedule will be disabled after 60 days. GitHub sends a warning email beforehand. To turn it back on, open *Actions → fetch-forecasts → Enable workflow*, or run:
+GitHub automatically disables scheduled workflows in a **public** repository after **60 days with no repository activity**. The daily data commits normally count as activity. If the job keeps failing (for example, during a long outage of the forecast API), there will be no commits, and the schedule will be disabled after 60 days. GitHub sends a warning email beforehand. To turn it back on, open *Actions → fetch-forecasts → Enable workflow*, or run:
 
 ```bash
 gh workflow enable fetch-forecasts.yml --repo flyorfold/forecast-log

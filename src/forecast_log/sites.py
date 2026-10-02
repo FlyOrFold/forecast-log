@@ -3,6 +3,8 @@
 Usage: PYTHONPATH=src python -m forecast_log.sites [--csv sites.csv] [--yaml sites.yaml]
 
 sites.csv is the hand-edited source (spreadsheet-friendly). This script:
+  - skips rows marked `skip` and rows missing any required field (they stay
+    in sites.csv but are left out of sites.yaml, so they are not forecast),
   - fills blank `timezone` cells by looking up the coordinates (and writes
     them back into sites.csv so you can see them),
   - bumps criteria_version if any existing site's location, timezone or
@@ -25,7 +27,13 @@ from . import config, openmeteo
 CSV_COLUMNS = [
     "id", "name", "lat", "lon", "timezone", "dir_ranges",
     "speed_min", "speed_max", "gust_max", "rain_mm_max",
-    "fly_start", "fly_end", "min_hours", "placeholder", "notes",
+    "fly_start", "fly_end", "min_hours", "skip", "notes",
+]  # fmt: skip
+# A row missing any of these is skipped (not forecast). Timezone may be blank:
+# it is looked up from lat/lon.
+REQUIRED = [
+    "lat", "lon", "dir_ranges", "speed_min", "speed_max", "gust_max",
+    "rain_mm_max", "fly_start", "fly_end", "min_hours",
 ]  # fmt: skip
 DEFAULT_MODEL = "gfs_seamless"
 
@@ -49,9 +57,6 @@ HEADER = """\
 #   precipitation <= precip_max
 # The flying window covers hours starting at flying_hours[0] up to, but not
 # including, flying_hours[1]. [10, 18] means 10:00 through 17:59.
-#
-# A site with `placeholder: true` blocks the job from writing data
-# (--dry-run still works).
 """
 
 
@@ -86,7 +91,7 @@ def _bool(text):
         return False
     if t in ("yes", "y", "true", "1", "x"):
         return True
-    raise ValueError(f"placeholder must be yes/no, got {text!r}")
+    raise ValueError(f"skip must be yes or blank, got {text!r}")
 
 
 def read_csv(path):
@@ -116,7 +121,6 @@ def row_to_site(row, line):
         return {
             "id": sid,
             "name": row["name"].strip() or sid,
-            "placeholder": _bool(row["placeholder"]),
             "lat": _num(row["lat"]),
             "lon": _num(row["lon"]),
             "timezone": row["timezone"].strip(),
@@ -165,15 +169,18 @@ def _fmt(v):
     return str(v)
 
 
-def render_yaml(version, model, sites) -> str:
-    out = [HEADER, f"criteria_version: {version}", "", f"model: {_fmt(model)}", "", "sites:"]
+def render_yaml(version, model, sites, skipped=()) -> str:
+    out = [HEADER]
+    if skipped:
+        out.append("# Rows in sites.csv NOT forecast:")
+        out.extend(f"#   {sid}: {reason}" for sid, reason in skipped)
+        out.append("")
+    out += [f"criteria_version: {version}", "", f"model: {_fmt(model)}", "", "sites:"]
     for s in sites:
         out.append(f"  - id: {_fmt(s['id'])}")
         if s["notes"]:
             out.append(f"    # {s['notes']}")
         out.append(f"    name: {_fmt(s['name'])}")
-        if s["placeholder"]:
-            out.append("    placeholder: true")
         for k in ("lat", "lon", "timezone"):
             out.append(f"    {k}: {_fmt(s[k])}")
         out.append("    criteria:")
@@ -195,12 +202,28 @@ def generate(csv_path, yaml_path, lookup=lookup_timezone, log=print):
     """Returns (yaml_text, csv_rows_changed). Writes nothing."""
     rows, _ = read_csv(csv_path)
     csv_changed = False
-    for row in rows:
+    sites, skipped = [], []
+    for line, row in enumerate(rows, start=2):
+        sid = row["id"].strip()
+        if not sid:
+            raise ValueError(f"sites.csv line {line}: id is empty")
+        try:
+            skip = _bool(row["skip"])
+        except ValueError as e:
+            raise ValueError(f"sites.csv line {line}: {e}") from e
+        missing = [c for c in REQUIRED if not (row[c] or "").strip()]
+        if skip or missing:
+            reason = "skip is set" if skip else "missing " + ", ".join(missing)
+            skipped.append((sid, reason))
+            log(f"{sid}: not forecast ({reason})")
+            continue
         if not row["timezone"].strip():
             row["timezone"] = lookup(row["lat"].strip(), row["lon"].strip())
-            log(f"{row['id']}: looked up timezone {row['timezone']}")
+            log(f"{sid}: looked up timezone {row['timezone']}")
             csv_changed = True
-    sites = [row_to_site(r, i) for i, r in enumerate(rows, start=2)]
+        sites.append(row_to_site(row, line))
+    if not sites:
+        raise ValueError("no complete, non-skipped rows in sites.csv")
 
     old_raw = None
     if Path(yaml_path).exists():
@@ -211,7 +234,7 @@ def generate(csv_path, yaml_path, lookup=lookup_timezone, log=print):
     if changed:
         log(f"criteria changed for {', '.join(changed)}: criteria_version -> {version}")
 
-    text = render_yaml(version, model, sites)
+    text = render_yaml(version, model, sites, skipped)
     config.parse(yaml.safe_load(text))  # full validation before anything is written
     return text, rows if csv_changed else None
 

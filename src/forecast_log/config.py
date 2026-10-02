@@ -16,7 +16,6 @@ class Site:
     lon: float
     timezone: str
     criteria: Criteria
-    placeholder: bool
 
 
 @dataclass(frozen=True)
@@ -79,7 +78,6 @@ def parse(raw: dict) -> Config:
                 lon=float(s["lon"]),
                 timezone=s["timezone"],
                 criteria=parse_criteria(s["criteria"], sid),
-                placeholder=bool(s.get("placeholder", False)),
             )
         )
     if not sites:
