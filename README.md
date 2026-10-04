@@ -127,3 +127,10 @@ gh workflow enable fetch-forecasts.yml --repo flyorfold/forecast-log
 ```
 
 Any push to the repo also resets the 60-day clock.
+
+## License
+
+Code is under the [MIT License](LICENSE). The data (`data/`, `sites.csv` and `sites.yaml`) is under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Credit it as "FlyOrFold forecast-log,
+derived from Open-Meteo.com data (CC BY 4.0)". Open-Meteo's own terms still apply to the weather data
+it is derived from. The flyorfold name and logo are not licensed.
