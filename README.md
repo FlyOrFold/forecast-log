@@ -116,7 +116,7 @@ Don't commit data from local runs. Data should come from the workflow, or from a
 
 ## GitHub Actions
 
-`.github/workflows/fetch-forecasts.yml` runs daily at **10:30 UTC** and can also be started by hand from the Actions tab (*Run workflow*, with an optional dry-run checkbox). It runs the tests, fetches, and commits `data/` as `github-actions[bot]` only if something changed. A concurrency group stops two runs from racing.
+`.github/workflows/fetch-forecasts.yml` runs daily at **10:17 UTC** and can also be started by hand from the Actions tab (*Run workflow*, with an optional dry-run checkbox). It runs the tests, fetches, and commits `data/` as `github-actions[bot]` only if something changed. A concurrency group stops two runs from racing.
 
 ### Scheduled-workflow auto-disable
 

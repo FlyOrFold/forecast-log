@@ -2,8 +2,9 @@ name: fetch-forecasts
 
 on:
   schedule:
-    # 10:30 UTC (06:30 EDT / 05:30 EST): after the 00Z ensemble runs have published.
-    - cron: "30 10 * * *"
+    # 10:17 UTC (06:17 EDT / 05:17 EST): after the 00Z ensemble runs have published.
+    # Off the :00/:30 marks, where GitHub schedule delays are worst.
+    - cron: "17 10 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
