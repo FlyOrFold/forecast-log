@@ -37,6 +37,8 @@ sites:
     lat: 41.4873
     lon: -81.7477
     timezone: "America/New_York"
+    pge_id: 9908
+    info_url: "https://www.clevelandmetroparks.com/parks/visit/parks/lakefront-reservation/edgewater-park"
     criteria:
       wind_speed_min: 5
       wind_speed_max: 15
@@ -52,6 +54,8 @@ sites:
     lat: 35.349
     lon: -85.3321
     timezone: "America/Chicago"
+    pge_id: 22517
+    info_url: "https://tennesseetreetoppers.net/pilot-information/henson-gap/"
     criteria:
       wind_speed_min: 5
       wind_speed_max: 15
@@ -67,6 +71,8 @@ sites:
     lat: 38.9989
     lon: -79.4352
     timezone: "America/New_York"
+    pge_id: 21300
+    info_url: "http://mountaineerflyers.org/Canaan%20Valley%20Site%20Guide.htm"
     criteria:
       wind_speed_min: 0
       wind_speed_max: 15

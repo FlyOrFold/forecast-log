@@ -27,7 +27,7 @@ from . import config, openmeteo
 CSV_COLUMNS = [
     "id", "name", "lat", "lon", "timezone", "dir_ranges",
     "speed_min", "speed_max", "gust_max", "rain_mm_max",
-    "fly_start", "fly_end", "min_hours", "skip", "notes",
+    "fly_start", "fly_end", "min_hours", "skip", "notes", "pge_id", "info_url",
 ]  # fmt: skip
 # A row missing any of these is skipped (not forecast). Timezone may be blank:
 # it is looked up from lat/lon.
@@ -94,6 +94,23 @@ def _bool(text):
     raise ValueError(f"skip must be yes or blank, got {text!r}")
 
 
+def _pge_id(text):
+    """Paragliding Earth site number, or None if blank."""
+    t = text.strip()
+    if not t:
+        return None
+    if not t.isdigit():
+        raise ValueError(f"pge_id must be a Paragliding Earth site number, got {text!r}")
+    return int(t)
+
+
+def _url(text):
+    t = text.strip()
+    if t and not t.startswith(("http://", "https://")):
+        raise ValueError(f"info_url must start with http:// or https://, got {text!r}")
+    return t or None
+
+
 def read_csv(path):
     # utf-8-sig strips the BOM Excel adds when saving "CSV UTF-8".
     with open(path, newline="", encoding="utf-8-sig") as f:
@@ -134,6 +151,8 @@ def row_to_site(row, line):
                 "min_consecutive_hours": int(_num(row["min_hours"])),
             },
             "notes": " ".join((row.get("notes") or "").split()),
+            "pge_id": _pge_id(row.get("pge_id") or ""),
+            "info_url": _url(row.get("info_url") or ""),
         }
     except ValueError as e:
         raise ValueError(f"sites.csv line {line}: {e}") from e
@@ -183,6 +202,9 @@ def render_yaml(version, model, sites, skipped=()) -> str:
         out.append(f"    name: {_fmt(s['name'])}")
         for k in ("lat", "lon", "timezone"):
             out.append(f"    {k}: {_fmt(s[k])}")
+        for k in ("pge_id", "info_url"):
+            if s[k] is not None:
+                out.append(f"    {k}: {_fmt(s[k])}")
         out.append("    criteria:")
         for k, v in s["criteria"].items():
             out.append(f"      {k}: {_fmt(v)}")

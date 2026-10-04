@@ -73,6 +73,8 @@ Columns (units: mph, mm per hour, degrees the wind blows **from**, site-local ho
 | `min_hours` | `2` | consecutive qualifying hours needed for the day to count as flyable |
 | `skip` | `yes` or blank | `yes` keeps the row in the CSV but stops forecasting it |
 | `notes` | | free text; copied into `sites.yaml` as a comment |
+| `pge_id` | `9908` | optional [Paragliding Earth](https://www.paraglidingearth.com/) site number; the page is `https://www.paraglidingearth.com/?site=<pge_id>` |
+| `info_url` | | optional link to local site info, such as the managing club's site page |
 
 `criteria_version` is **bumped automatically** when an existing site's coordinates, timezone or criteria change. Adding a site, removing one, or editing names and notes does not bump it. `model` is the only setting edited directly in `sites.yaml`. If you change it, bump `criteria_version` by hand.
 

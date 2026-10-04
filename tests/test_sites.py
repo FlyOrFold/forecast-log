@@ -53,6 +53,17 @@ class GenerateTest(unittest.TestCase):
         out, _ = self.gen(f"{HEADER}\n{ROW}\n{incomplete}\n{skipped}\n")
         self.assertEqual([s["id"] for s in out["sites"]], ["ridge"])
 
+    def test_pge_id_and_info_url(self):
+        out, _ = self.gen(f"{HEADER}\n{ROW},7343,https://example.org/site\n")
+        s = out["sites"][0]
+        self.assertEqual(s["pge_id"], 7343)
+        self.assertEqual(s["info_url"], "https://example.org/site")
+        out, _ = self.gen(f"{HEADER}\n{ROW}\n")
+        self.assertNotIn("pge_id", out["sites"][0])
+        for bad in (f"{ROW},#7343,", f"{ROW},,example.org"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                self.gen(f"{HEADER}\n{bad}\n")
+
     def test_skipped_rows_listed_in_yaml_comment(self):
         with tempfile.TemporaryDirectory() as d:
             c = write(d, "sites.csv", f"{HEADER}\n{ROW}\nnodir,N,40,-83,,,,,,,,,,,\n")
