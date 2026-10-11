@@ -33,7 +33,7 @@ model: "gfs_seamless"
 sites:
   - id: "lake-erie-cleveland"
     # Window crosses north. speed_min and speed_max (hard max; good max is 12) are working assumptions. Gust limit is the USHPA P3 recommendation.
-    name: "Lake Erie ridge, Cleveland"
+    name: "Edgewater"
     lat: 41.4873
     lon: -81.7477
     timezone: "America/New_York"
@@ -50,7 +50,7 @@ sites:
 
   - id: "tennessee-cliff"
     # Central time. Ideal direction 260-280; confirm direction and speed limits with the club. Stability check wanted but not scored yet.
-    name: "Tennessee cliff launch"
+    name: "Tennessee Tree Toppers"
     lat: 35.349
     lon: -85.3321
     timezone: "America/Chicago"
